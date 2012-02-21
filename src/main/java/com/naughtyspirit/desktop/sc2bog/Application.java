@@ -1,4 +1,4 @@
-package com.naughtyspirit.desktop.sc2blog;
+package com.naughtyspirit.desktop.sc2bog;
 
 /**
  * Copyright (c) 2012 Naughty Spirit
