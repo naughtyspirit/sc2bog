@@ -23,9 +23,10 @@ package com.naughtyspirit.desktop.sc2bog;
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.google.common.collect.Lists;
 import com.naughtyspirit.desktop.sc2bog.injection.annotation.MainPanel;
 import com.naughtyspirit.desktop.sc2bog.model.GameObject;
+import com.naughtyspirit.desktop.sc2bog.model.db.entity.Unit;
+import com.naughtyspirit.desktop.sc2bog.model.db.mapper.UnitMapper;
 import com.naughtyspirit.desktop.sc2bog.ui.CustomizeObjectDialog;
 import com.naughtyspirit.desktop.sc2bog.ui.listener.OnDoneListener;
 import org.jdesktop.swingx.JXTable;
@@ -46,12 +47,7 @@ import java.util.List;
  */
 public class MainFrame extends JFrame {
 
-  @Inject
-  private JMenuItem newItem;
-
-  @Inject
-  @MainPanel
-  private JPanel mainPanel;
+  private final JPanel mainPanel;
 
   private String buildRace;
   private OnDoneListener onDoneListener = new OnDoneListener() {
@@ -61,7 +57,18 @@ public class MainFrame extends JFrame {
     }
   };
 
-  public MainFrame() {
+
+  private UnitMapper unitMapper;
+
+  @Inject
+  public void setUnitMapper(UnitMapper unitMapper) {
+    this.unitMapper = unitMapper;
+  }
+
+  @Inject
+  public MainFrame(@MainPanel JPanel mainPanel) {
+    super("SC2 Build Order Generator");
+    this.mainPanel = mainPanel;
     Toolkit tk = Toolkit.getDefaultToolkit();
     Dimension screenSize = tk.getScreenSize();
     int screenHeight = screenSize.height;
@@ -69,6 +76,17 @@ public class MainFrame extends JFrame {
     setSize(screenWidth / 2, screenHeight / 2);
     setLocation(screenWidth / 4, screenHeight / 4);
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+    setContentPane(mainPanel);
+    JMenuBar menuBar = new JMenuBar();
+    JMenu menu = new JMenu("File");
+    JMenuItem newItem = new JMenuItem();
+    newItem.setAction(new NewBuildAction("New"));
+    menu.add(newItem);
+    JMenuItem exitItem = new JMenuItem("Exit");
+    menu.add(exitItem);
+    menuBar.add(menu);
+    setJMenuBar(menuBar);
   }
 
   class NewBuildAction extends AbstractAction {
@@ -93,16 +111,16 @@ public class MainFrame extends JFrame {
   }
 
   public void addBuildOrderView() {
-    List<String> items = Lists.newArrayList("SCV", "Marine", "Barracks");
+    List<Unit> units = unitMapper.findByRaceName(buildRace);
     JLabel searchLabel = new JLabel("Search");
-    final JComboBox<String> searchTextField = new JComboBox<String>(items.toArray(new String[items.size()]));
+    final JComboBox<Unit> searchTextField = new JComboBox<Unit>(units.toArray(new Unit[units.size()]));
     AutoCompleteDecorator.decorate(searchTextField);
 
     searchTextField.getEditor().addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent arg0) {
-        String selectedObject = (String) searchTextField.getSelectedItem();
-        CustomizeObjectDialog customizeObjectDialog = new CustomizeObjectDialog(MainFrame.this, selectedObject);
+        Unit selectedObject = (Unit) searchTextField.getSelectedItem();
+        CustomizeObjectDialog customizeObjectDialog = new CustomizeObjectDialog(MainFrame.this, selectedObject.name);
         customizeObjectDialog.setOnDoneListener(onDoneListener);
         customizeObjectDialog.setVisible(true);
       }
@@ -132,17 +150,5 @@ public class MainFrame extends JFrame {
     scrollPane.setMinimumSize(new Dimension(600, 300));
     mainPanel.add(scrollPane, "span");
     validate();
-  }
-
-  public void addComponents() {
-    setContentPane(mainPanel);
-    JMenuBar menuBar = new JMenuBar();
-    JMenu menu = new JMenu("File");
-    newItem.setAction(new NewBuildAction("New"));
-    menu.add(newItem);
-    JMenuItem exitItem = new JMenuItem("Exit");
-    menu.add(exitItem);
-    menuBar.add(menu);
-    setJMenuBar(menuBar);
   }
 }

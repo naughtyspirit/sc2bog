@@ -1,4 +1,4 @@
-package com.naughtyspirit.desktop.sc2bog;
+package com.naughtyspirit.desktop.sc2bog.model.db.entity;
 
 /**
  * Copyright (c) 2012 Naughty Spirit
@@ -23,35 +23,22 @@ package com.naughtyspirit.desktop.sc2bog;
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.naughtyspirit.desktop.sc2bog.injection.DbModule;
-import com.naughtyspirit.desktop.sc2bog.injection.GuiModule;
-
-import javax.swing.*;
-
 /**
  * Author: Venelin Valkov <venelin@naughtyspirit.com>
- * Date: 21-02-2012
+ * Date: 22-02-2012
  */
-public class Application {
+public class Unit extends BaseGameEntity {
 
-  private void createAndShowGUI() {
-    Injector injector = Guice.createInjector(new DbModule(), new GuiModule());
-    MainFrame mainFrame = injector.getInstance(MainFrame.class);
-    mainFrame.setVisible(true);
-  }
+  public int supply;
 
-  public static void main(String[] args) {
-    Application application = new Application();
-    application.run();
-  }
-
-  private void run() {
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        createAndShowGUI();
-      }
-    });
+  public static Unit of(int id, String name, int minerals, int gas, int supply, int buildTime) {
+    Unit unit = new Unit();
+    unit.id = id;
+    unit.name = name;
+    unit.minerals = minerals;
+    unit.gas = gas;
+    unit.supply = supply;
+    unit.buildTime = buildTime;
+    return unit;
   }
 }
