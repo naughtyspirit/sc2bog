@@ -1,4 +1,4 @@
-package com.naughtyspirit.desktop.sc2bog;
+package com.naughtyspirit.desktop.sc2bog.model;
 
 /**
  * Copyright (c) 2012 Naughty Spirit
@@ -23,31 +23,60 @@ package com.naughtyspirit.desktop.sc2bog;
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.naughtyspirit.desktop.sc2bog.injection.GuiModule;
-
 /**
  * Author: Venelin Valkov <venelin@naughtyspirit.com>
- * Date: 21-02-2012
+ * Date: 22-02-2012
  */
-public class Application {
+public class GameObject {
 
-  private static void createAndShowGUI() {
-    Injector injector = Guice.createInjector(new GuiModule());
-    MainFrame mainFrame = new MainFrame();
-    injector.injectMembers(mainFrame);
-    mainFrame.addComponents();
-    mainFrame.setVisible(true);
+  private final String name;
+  private final Type type;
+  private final int minerals;
+  private final int gas;
+  private final int supply;
+  private final int quantity;
+  private final int time;
+
+  public enum Type {
+    UNIT, BUILDING, UPGRADE, ABILITY
   }
 
-  public static void main(String[] args) {
-    //Schedule a job for the event-dispatching thread:
-    //creating and showing this application's GUI.
-    javax.swing.SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        createAndShowGUI();
-      }
-    });
+  public GameObject(String name, Type type, int minerals, int gas, int supply, int quantity, int time) {
+
+    this.name = name;
+    this.type = type;
+    this.minerals = minerals;
+    this.gas = gas;
+    this.supply = supply;
+    this.quantity = quantity;
+    this.time = time;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public Type getType() {
+    return type;
+  }
+
+  public int getMinerals() {
+    return minerals;
+  }
+
+  public int getGas() {
+    return gas;
+  }
+
+  public int getSupply() {
+    return supply;
+  }
+
+  public int getQuantity() {
+    return quantity;
+  }
+
+  public int getTime() {
+    return time;
   }
 }

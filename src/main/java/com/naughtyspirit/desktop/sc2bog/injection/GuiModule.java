@@ -1,4 +1,4 @@
-package com.naughtyspirit.desktop.sc2bog;
+package com.naughtyspirit.desktop.sc2bog.injection;
 
 /**
  * Copyright (c) 2012 Naughty Spirit
@@ -23,31 +23,20 @@ package com.naughtyspirit.desktop.sc2bog;
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.naughtyspirit.desktop.sc2bog.injection.GuiModule;
+import com.google.inject.AbstractModule;
+import com.naughtyspirit.desktop.sc2bog.injection.annotation.MainPanel;
+import net.miginfocom.swing.MigLayout;
+
+import javax.swing.*;
 
 /**
  * Author: Venelin Valkov <venelin@naughtyspirit.com>
- * Date: 21-02-2012
+ * Date: 22-02-2012
  */
-public class Application {
+public class GuiModule extends AbstractModule {
 
-  private static void createAndShowGUI() {
-    Injector injector = Guice.createInjector(new GuiModule());
-    MainFrame mainFrame = new MainFrame();
-    injector.injectMembers(mainFrame);
-    mainFrame.addComponents();
-    mainFrame.setVisible(true);
-  }
-
-  public static void main(String[] args) {
-    //Schedule a job for the event-dispatching thread:
-    //creating and showing this application's GUI.
-    javax.swing.SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        createAndShowGUI();
-      }
-    });
+  @Override
+  protected void configure() {
+    bind(JPanel.class).annotatedWith(MainPanel.class).toInstance(new JPanel(new MigLayout("center", "", "[100]")));
   }
 }
