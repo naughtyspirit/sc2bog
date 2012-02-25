@@ -23,11 +23,27 @@ package com.naughtyspirit.desktop.sc2bog.model.db.entity;
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import com.naughtyspirit.desktop.sc2bog.model.GameObject;
+
 /**
  * Author: Venelin Valkov <venelin@naughtyspirit.com>
  * Date: 22-02-2012
  */
-public class BaseEntity {
+public abstract class BaseEntity {
 
   public int id;
+  public String name;
+
+  protected static <T extends BaseEntity> T of(T entity, int id, String name) {
+    entity.id = id;
+    entity.name = name;
+    return entity;
+  }
+
+  @Override
+  public String toString() {
+    return name;
+  }
+
+  public abstract GameObject.Type getType();
 }

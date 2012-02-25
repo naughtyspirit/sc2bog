@@ -23,11 +23,13 @@ package com.naughtyspirit.desktop.sc2bog.ui;
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.google.common.base.Optional;
+import com.naughtyspirit.desktop.sc2bog.injection.annotation.MainFrame;
+import com.naughtyspirit.desktop.sc2bog.injection.annotation.MainPanel;
 import com.naughtyspirit.desktop.sc2bog.model.GameObject;
+import com.naughtyspirit.desktop.sc2bog.model.db.entity.BaseEntity;
 import com.naughtyspirit.desktop.sc2bog.ui.listener.OnDoneListener;
-import net.miginfocom.swing.MigLayout;
 
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -38,44 +40,71 @@ import java.awt.event.ActionEvent;
  */
 public class CustomizeObjectDialog extends JDialog {
 
-  private Optional<OnDoneListener> doneListener;
-  private JButton doneButton;
+  private BaseEntity selectedEntity;
+  private int startTime;
+  private final JButton doneButton;
+  private final JSpinner quantitySpinner;
+  private JSpinner timeSpinner;
 
-  public CustomizeObjectDialog(Frame owner, String selectedObject) {
+  @Inject
+  public CustomizeObjectDialog(@MainFrame JFrame owner, @MainPanel JPanel mainPanel) {
     super(owner, "Customize object", true);
-
-    setSize(owner.getWidth() / 2, owner.getHeight() / 2);
-    setLocation(owner.getX() + owner.getWidth() / 4, owner.getY() + owner.getHeight() / 4);
-
-    JPanel mainPanel = new JPanel(new MigLayout("center", "", "[100]"));
+    centerAndResize();
     setContentPane(mainPanel);
-    mainPanel.add(new JLabel(selectedObject));
-    JSpinner quantitySpinner = new JSpinner();
-    quantitySpinner.setMinimumSize(new Dimension(40, 5));
-    quantitySpinner.setValue(1);
-    quantitySpinner.setEditor(new JSpinner.NumberEditor(quantitySpinner, "#"));
-    mainPanel.add(quantitySpinner);
+    quantitySpinner = createQuantitySpinner();
     doneButton = new JButton();
-    mainPanel.add(doneButton);
   }
 
-
-  @Override
-  public void setVisible(boolean b) {
-    if (b == true && doneListener.isPresent()) {
-      doneButton.setAction(new AbstractAction("Done") {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-          GameObject gameObject = new GameObject("SCV", GameObject.Type.UNIT, 50, 0, 0, 1, 50);
-          doneListener.get().onDone(gameObject);
-          setVisible(false);
-        }
-      });
-    }
-    super.setVisible(b);
+  private JSpinner createTimeSpinner() {
+    JSpinner spinner = new JSpinner();
+    spinner.setMinimumSize(new Dimension(40, 5));
+    SpinnerNumberModel model = new SpinnerNumberModel(startTime, startTime, 999, 1);
+    spinner.setModel(model);
+    spinner.setEditor(new JSpinner.NumberEditor(spinner, "#"));
+    return spinner;
   }
 
-  public void setOnDoneListener(OnDoneListener onDoneListener) {
-    this.doneListener = Optional.of(onDoneListener);
+  private void centerAndResize() {
+    setSize(getOwner().getWidth() / 2, getOwner().getHeight() / 2);
+    setLocation(getOwner().getX() + getOwner().getWidth() / 4, getOwner().getY() + getOwner().getHeight() / 4);
+  }
+
+  public void setSelectedEntity(BaseEntity entity) {
+    this.selectedEntity = entity;
+  }
+
+  public void display() {
+    add(new JLabel(selectedEntity.name), "wrap 10");
+    add(new JLabel("Quantity"));
+    add(quantitySpinner, "wrap 10");
+    add(new JLabel("Time"));
+    timeSpinner = createTimeSpinner();
+    add(timeSpinner, "wrap 10");
+    add(doneButton);
+    setVisible(true);
+  }
+
+  private JSpinner createQuantitySpinner() {
+    JSpinner spinner = new JSpinner();
+    spinner.setMinimumSize(new Dimension(40, 5));
+    SpinnerNumberModel model = new SpinnerNumberModel(1, 1, 100, 1);
+    spinner.setModel(model);
+    spinner.setEditor(new JSpinner.NumberEditor(spinner, "#"));
+    return spinner;
+  }
+
+  public void setOnDoneListener(final OnDoneListener onDoneListener) {
+    doneButton.setAction(new AbstractAction("Done") {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        GameObject gameObject = new GameObject(selectedEntity.name, selectedEntity.getType(), (Integer) quantitySpinner.getValue(), (Integer) timeSpinner.getValue());
+        onDoneListener.onDone(gameObject);
+        setVisible(false);
+      }
+    });
+  }
+
+  public void setStartTime(int startTime) {
+    this.startTime = startTime;
   }
 }

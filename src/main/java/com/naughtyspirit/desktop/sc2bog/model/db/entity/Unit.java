@@ -23,6 +23,8 @@ package com.naughtyspirit.desktop.sc2bog.model.db.entity;
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import com.naughtyspirit.desktop.sc2bog.model.GameObject;
+
 /**
  * Author: Venelin Valkov <venelin@naughtyspirit.com>
  * Date: 22-02-2012
@@ -38,7 +40,12 @@ public class Unit extends BaseGameEntity {
     unit.minerals = minerals;
     unit.gas = gas;
     unit.supply = supply;
-    unit.buildTime = buildTime;
+    unit.time = buildTime;
     return unit;
+  }
+
+  @Override
+  public GameObject.Type getType() {
+    return GameObject.Type.UNIT;
   }
 }

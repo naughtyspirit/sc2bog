@@ -38,8 +38,8 @@ public class Application {
 
   private void createAndShowGUI() {
     Injector injector = Guice.createInjector(new DbModule(), new GuiModule());
-    MainFrame mainFrame = injector.getInstance(MainFrame.class);
-    mainFrame.setVisible(true);
+    AppFrame appFrame = injector.getInstance(AppFrame.class);
+    appFrame.setVisible(true);
   }
 
   public static void main(String[] args) {

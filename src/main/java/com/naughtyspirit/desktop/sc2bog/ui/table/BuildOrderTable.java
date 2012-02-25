@@ -1,4 +1,4 @@
-package com.naughtyspirit.desktop.sc2bog.model;
+package com.naughtyspirit.desktop.sc2bog.ui.table;
 
 /**
  * Copyright (c) 2012 Naughty Spirit
@@ -23,64 +23,33 @@ package com.naughtyspirit.desktop.sc2bog.model;
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import com.naughtyspirit.desktop.sc2bog.model.GameObject;
+import com.naughtyspirit.desktop.sc2bog.ui.table.model.BuildOrderModel;
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.Highlighter;
+import org.jdesktop.swingx.decorator.HighlighterFactory;
+
+import javax.swing.*;
+
 /**
  * Author: Venelin Valkov <venelin@naughtyspirit.com>
- * Date: 22-02-2012
+ * Date: 25-02-2012
  */
-public class GameObject {
+public class BuildOrderTable extends JXTable {
 
-  private final String name;
-  private final Type type;
-  private final int minerals;
-  private final int gas;
-  private final int supply;
-  private final int quantity;
-  private final int time;
+  private BuildOrderModel buildOrderModel = new BuildOrderModel();
 
-  public GameObject(String name, Type type, int quantity, int time) {
-    this(name, type, 0, 0, 0, quantity, time);
+  public BuildOrderTable() {
+    setFillsViewportHeight(true);
+    setColumnControlVisible(true);
+
+    Highlighter alternateHighlighter = HighlighterFactory.createAlternateStriping();
+    addHighlighter(alternateHighlighter);
+    setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    setModel(buildOrderModel);
   }
 
-  public enum Type {
-    RACE, UNIT, BUILDING, UPGRADE, ABILITY
-  }
-
-  public GameObject(String name, Type type, int minerals, int gas, int supply, int quantity, int time) {
-
-    this.name = name;
-    this.type = type;
-    this.minerals = minerals;
-    this.gas = gas;
-    this.supply = supply;
-    this.quantity = quantity;
-    this.time = time;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public Type getType() {
-    return type;
-  }
-
-  public int getMinerals() {
-    return minerals;
-  }
-
-  public int getGas() {
-    return gas;
-  }
-
-  public int getSupply() {
-    return supply;
-  }
-
-  public int getQuantity() {
-    return quantity;
-  }
-
-  public int getTime() {
-    return time;
+  public void addRow(GameObject row) {
+    buildOrderModel.addRow(row);
   }
 }

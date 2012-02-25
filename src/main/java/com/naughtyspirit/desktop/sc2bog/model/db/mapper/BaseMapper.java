@@ -62,7 +62,6 @@ public abstract class BaseMapper<Entity_Type extends BaseEntity> {
   protected Entity_Type selectOne(String sql, int requestMethod, Entity_Type entityInstance) {
     try {
       Statement statement = connection.createStatement();
-      System.out.println(sql);
       ResultSet resultSet = statement.executeQuery(sql);
       resultSet.next();
       onResult(resultSet, entityInstance, requestMethod);

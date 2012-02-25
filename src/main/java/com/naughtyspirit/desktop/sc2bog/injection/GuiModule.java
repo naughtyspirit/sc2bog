@@ -24,8 +24,10 @@ package com.naughtyspirit.desktop.sc2bog.injection;
  */
 
 import com.google.inject.AbstractModule;
+import com.naughtyspirit.desktop.sc2bog.AppFrame;
+import com.naughtyspirit.desktop.sc2bog.injection.annotation.MainFrame;
 import com.naughtyspirit.desktop.sc2bog.injection.annotation.MainPanel;
-import net.miginfocom.swing.MigLayout;
+import com.naughtyspirit.desktop.sc2bog.ui.AppPanel;
 
 import javax.swing.*;
 
@@ -37,6 +39,7 @@ public class GuiModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(JPanel.class).annotatedWith(MainPanel.class).toInstance(new JPanel(new MigLayout("center", "", "[100]")));
+    bind(JPanel.class).annotatedWith(MainPanel.class).to(AppPanel.class);
+    bind(JFrame.class).annotatedWith(MainFrame.class).to(AppFrame.class);
   }
 }

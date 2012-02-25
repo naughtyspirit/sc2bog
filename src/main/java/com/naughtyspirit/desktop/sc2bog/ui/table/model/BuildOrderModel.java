@@ -1,4 +1,4 @@
-package com.naughtyspirit.desktop.sc2bog.model;
+package com.naughtyspirit.desktop.sc2bog.ui.table.model;
 
 /**
  * Copyright (c) 2012 Naughty Spirit
@@ -23,64 +23,25 @@ package com.naughtyspirit.desktop.sc2bog.model;
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import com.naughtyspirit.desktop.sc2bog.model.GameObject;
+
+import javax.swing.table.DefaultTableModel;
+
 /**
  * Author: Venelin Valkov <venelin@naughtyspirit.com>
- * Date: 22-02-2012
+ * Date: 25-02-2012
  */
-public class GameObject {
+public class BuildOrderModel extends DefaultTableModel {
 
-  private final String name;
-  private final Type type;
-  private final int minerals;
-  private final int gas;
-  private final int supply;
-  private final int quantity;
-  private final int time;
-
-  public GameObject(String name, Type type, int quantity, int time) {
-    this(name, type, 0, 0, 0, quantity, time);
+  public BuildOrderModel() {
+    addColumn("Name");
+    addColumn("Type");
+    addColumn("Quantity");
+    addColumn("Time");
   }
 
-  public enum Type {
-    RACE, UNIT, BUILDING, UPGRADE, ABILITY
+  public void addRow(GameObject row) {
+    addRow(new Object[] {row.getName(), row.getType().toString(), row.getQuantity(), row.getTime()});
   }
 
-  public GameObject(String name, Type type, int minerals, int gas, int supply, int quantity, int time) {
-
-    this.name = name;
-    this.type = type;
-    this.minerals = minerals;
-    this.gas = gas;
-    this.supply = supply;
-    this.quantity = quantity;
-    this.time = time;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public Type getType() {
-    return type;
-  }
-
-  public int getMinerals() {
-    return minerals;
-  }
-
-  public int getGas() {
-    return gas;
-  }
-
-  public int getSupply() {
-    return supply;
-  }
-
-  public int getQuantity() {
-    return quantity;
-  }
-
-  public int getTime() {
-    return time;
-  }
 }

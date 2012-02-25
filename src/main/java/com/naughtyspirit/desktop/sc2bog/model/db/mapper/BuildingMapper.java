@@ -24,8 +24,8 @@ package com.naughtyspirit.desktop.sc2bog.model.db.mapper;
  */
 
 import com.google.common.collect.Lists;
+import com.naughtyspirit.desktop.sc2bog.model.db.entity.Building;
 import com.naughtyspirit.desktop.sc2bog.model.db.entity.Race;
-import com.naughtyspirit.desktop.sc2bog.model.db.entity.Unit;
 
 import javax.inject.Inject;
 import java.sql.ResultSet;
@@ -34,9 +34,9 @@ import java.util.List;
 
 /**
  * Author: Venelin Valkov <venelin@naughtyspirit.com>
- * Date: 22-02-2012
+ * Date: 25-02-2012
  */
-public class UnitMapper extends BaseMapper<Unit> {
+public class BuildingMapper extends BaseMapper<Building> {
 
   private static final int FIND_BY_RACE = 1;
 
@@ -47,25 +47,25 @@ public class UnitMapper extends BaseMapper<Unit> {
     this.raceMapper = raceMapper;
   }
 
-  public List<Unit> findByRace(Race race) {
-    return selectAll("SELECT * FROM unit WHERE race_id = " + race.id, FIND_BY_RACE, Lists.<Unit>newArrayList());
+  public List<Building> findByRace(Race race) {
+    return selectAll("SELECT * FROM building WHERE race_id = " + race.id, FIND_BY_RACE, Lists.<Building>newArrayList());
   }
 
   @Override
-  protected void onResult(ResultSet resultSet, Unit unit, int requestMethod) throws SQLException {
+  protected void onResult(ResultSet resultSet, Building building, int requestMethod) throws SQLException {
     //To change body of implemented methods use File | Settings | File Templates.
   }
 
   @Override
-  protected void onEachResult(ResultSet resultSet, List<Unit> resultList, int requestMethod) throws SQLException {
+  protected void onEachResult(ResultSet resultSet, List<Building> resultList, int requestMethod) throws SQLException {
     switch (requestMethod) {
       case FIND_BY_RACE:
-        resultList.add(Unit.of(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getInt("minerals"), resultSet.getInt("gas"), resultSet.getInt("supply"), resultSet.getInt("build_time")));
+        resultList.add(Building.of(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getInt("minerals"), resultSet.getInt("gas"), resultSet.getInt("build_time")));
         break;
     }
   }
 
-  public List<Unit> findByRaceName(String name) {
+  public List<Building> findByRaceName(String name) {
     Race race = raceMapper.findByName(name);
     return findByRace(race);
   }

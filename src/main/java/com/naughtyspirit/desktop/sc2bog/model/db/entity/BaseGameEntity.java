@@ -27,15 +27,19 @@ package com.naughtyspirit.desktop.sc2bog.model.db.entity;
  * Author: Venelin Valkov <venelin@naughtyspirit.com>
  * Date: 22-02-2012
  */
-public class BaseGameEntity extends BaseEntity {
+public abstract class BaseGameEntity extends BaseEntity {
 
-  public String name;
   public int minerals;
   public int gas;
-  public int buildTime;
+  public int time;
 
-  @Override
-  public String toString() {
-    return name;
+  protected static <T extends BaseGameEntity> T of(T entity, int id, String name, int minerals, int gas, int time) {
+    BaseEntity.of(entity, id, name);
+    entity.minerals = minerals;
+    entity.gas = gas;
+    entity.time = time;
+    return entity;
   }
+
+
 }

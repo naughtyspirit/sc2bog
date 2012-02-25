@@ -23,6 +23,8 @@ package com.naughtyspirit.desktop.sc2bog.model.db.entity;
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import com.naughtyspirit.desktop.sc2bog.model.GameObject;
+
 /**
  * Author: Venelin Valkov <venelin@naughtyspirit.com>
  * Date: 22-02-2012
@@ -36,5 +38,10 @@ public class Race extends BaseEntity {
     race.id = id;
     race.name = name;
     return race;
+  }
+
+  @Override
+  public GameObject.Type getType() {
+    return GameObject.Type.RACE;
   }
 }
