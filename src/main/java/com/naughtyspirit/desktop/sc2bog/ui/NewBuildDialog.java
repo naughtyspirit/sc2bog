@@ -63,7 +63,8 @@ public class NewBuildDialog extends JDialog {
   }
 
 
-  public interface OnDoneListener {
+  public interface OnOkListener {
+
     void onDone(String name, Race race);
   }
 
@@ -87,11 +88,11 @@ public class NewBuildDialog extends JDialog {
     setVisible(true);
   }
 
-  public void setOnDoneListener(final OnDoneListener onDoneListener) {
+  public void setOnOkListener(final OnOkListener onOkListener) {
     okButton.setAction(new AbstractAction("Ok") {
       @Override
       public void actionPerformed(ActionEvent e) {
-        onDoneListener.onDone(name.getText(), raceList.getItemAt(raceList.getSelectedIndex()));
+        onOkListener.onDone(name.getText(), raceList.getItemAt(raceList.getSelectedIndex()));
         setVisible(false);
       }
     });

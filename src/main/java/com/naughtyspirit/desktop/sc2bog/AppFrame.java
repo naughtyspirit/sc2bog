@@ -23,26 +23,22 @@ package com.naughtyspirit.desktop.sc2bog;
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import com.naughtyspirit.desktop.sc2bog.injection.annotation.MainPanel;
-import com.naughtyspirit.desktop.sc2bog.model.GameObject;
-import com.naughtyspirit.desktop.sc2bog.model.db.entity.*;
+import com.naughtyspirit.desktop.sc2bog.model.db.entity.BuildItem;
+import com.naughtyspirit.desktop.sc2bog.model.db.entity.BuildOrder;
+import com.naughtyspirit.desktop.sc2bog.model.db.entity.Race;
 import com.naughtyspirit.desktop.sc2bog.model.db.mapper.BuildOrderMapper;
-import com.naughtyspirit.desktop.sc2bog.model.db.mapper.BuildingMapper;
-import com.naughtyspirit.desktop.sc2bog.model.db.mapper.UnitMapper;
-import com.naughtyspirit.desktop.sc2bog.model.db.mapper.UpgradeMapper;
 import com.naughtyspirit.desktop.sc2bog.ui.AppMenu;
-import com.naughtyspirit.desktop.sc2bog.ui.CustomizeObjectDialog;
 import com.naughtyspirit.desktop.sc2bog.ui.NewBuildDialog;
-import com.naughtyspirit.desktop.sc2bog.ui.table.BuildOrderTable;
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
+import com.naughtyspirit.desktop.sc2bog.ui.view.AppView;
+import com.naughtyspirit.desktop.sc2bog.ui.view.BuildOrderListView;
+import com.naughtyspirit.desktop.sc2bog.ui.view.BuildOrderView;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.util.List;
 
 /**
@@ -50,43 +46,14 @@ import java.util.List;
  * Date: 22-02-2012
  */
 @Singleton
-public class AppFrame extends JFrame implements NewBuildDialog.OnDoneListener, AppMenu.OnNewListener, AppMenu.OnExitListener {
-
-  private CustomizeObjectDialog.OnDoneListener onDoneListener = new CustomizeObjectDialog.OnDoneListener() {
-    @Override
-    public void onDone(GameObject gameObject) {
-      buildOrderTable.addRow(gameObject);
-      startTime = gameObject.getTime() + 1;
-    }
-  };
+public class AppFrame extends JFrame implements NewBuildDialog.OnOkListener, AppMenu.OnNewListener, AppMenu.OnExitListener, BuildOrderView.OnSaveListener {
 
   @Inject
   Injector injector;
 
-  private UnitMapper unitMapper;
   private int startTime = 1;
+
   private BuildOrder buildOrder;
-
-  @Inject
-  public void setUnitMapper(UnitMapper unitMapper) {
-    this.unitMapper = unitMapper;
-  }
-
-  private UpgradeMapper upgradeMapper;
-
-  @Inject
-  public void setUpgradeMapper(UpgradeMapper upgradeMapper) {
-    this.upgradeMapper = upgradeMapper;
-  }
-
-  private BuildingMapper buildingMapper;
-
-  @Inject
-  public void setBuildingMapper(BuildingMapper buildingMapper) {
-    this.buildingMapper = buildingMapper;
-  }
-
-  private BuildOrderTable buildOrderTable;
 
   @Inject
   public void setBuildOrderMapper(BuildOrderMapper buildOrderMapper) {
@@ -106,47 +73,32 @@ public class AppFrame extends JFrame implements NewBuildDialog.OnDoneListener, A
     menuBar.setOnExitListener(this);
   }
 
+  @Override
+  public void onNew() {
+    NewBuildDialog newBuildDialog = injector.getInstance(NewBuildDialog.class);
+    newBuildDialog.setOnOkListener(this);
+    newBuildDialog.display();
+  }
+
+  @Override
+  public void onExit() {
+    System.exit(0);
+  }
+
   public void display() {
     displayBuildOrderList();
     setVisible(true);
   }
 
   private void displayBuildOrderList() {
+    BuildOrderListView view = injector.getInstance(BuildOrderListView.class);
+    displayView(view);
+  }
+
+  private void displayView(AppView view) {
     getContentPane().removeAll();
     repaint();
-    JLabel buildOrderListLabel = new JLabel("Saved Build Orders");
-    add(buildOrderListLabel, "wrap");
-    final DefaultListModel<BuildOrder> buildOrderListModel = new DefaultListModel<BuildOrder>();
-    List<BuildOrder> buildOrders = buildOrderMapper.findAll();
-    for (BuildOrder buildOrder : buildOrders) {
-      buildOrderListModel.addElement(buildOrder);
-    }
-    final JList<BuildOrder> list = new JList<BuildOrder>(buildOrderListModel);
-    list.addKeyListener(new KeyListener() {
-      @Override
-      public void keyTyped(KeyEvent e) {
-      }
-
-      @Override
-      public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-          BuildOrder buildOrder = list.getSelectedValue();
-          buildOrderMapper.delete(buildOrder);
-          buildOrderListModel.remove(list.getSelectedIndex());
-          list.revalidate();
-        }
-      }
-
-      @Override
-      public void keyReleased(KeyEvent e) {
-      }
-    });
-    list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-    list.setLayoutOrientation(JList.VERTICAL);
-    list.setVisibleRowCount(-1);
-    JScrollPane listScroll = new JScrollPane(list);
-    listScroll.setMinimumSize(new Dimension(200, 250));
-    add(listScroll);
+    view.display();
     revalidate();
   }
 
@@ -167,75 +119,17 @@ public class AppFrame extends JFrame implements NewBuildDialog.OnDoneListener, A
     displayBuildOrderView(race);
   }
 
-  @Override
-  public void onNew() {
-    NewBuildDialog newBuildDialog = injector.getInstance(NewBuildDialog.class);
-    newBuildDialog.setOnDoneListener(this);
-    newBuildDialog.display();
-  }
-
-  @Override
-  public void onExit() {
-    System.exit(0);
-  }
-
   public void displayBuildOrderView(Race race) {
-    getContentPane().removeAll();
-    repaint();
-
-    buildOrderTable = new BuildOrderTable();
-    buildOrderTable.addKeyListener(new KeyAdapter() {
-      @Override
-      public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-          buildOrderTable.removeSelectedRow();
-        }
-      }
-    });
-    List<BaseEntity> entities = entitiesForAutocompletion(race);
-    JLabel searchLabel = new JLabel("Search");
-    final JComboBox<BaseEntity> searchTextField = new JComboBox<BaseEntity>(entities.toArray(new BaseEntity[entities.size()]));
-    AutoCompleteDecorator.decorate(searchTextField);
-
-    searchTextField.getEditor().addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent event) {
-        BaseEntity selectedObject = searchTextField.getItemAt(searchTextField.getSelectedIndex());
-        CustomizeObjectDialog customizeObjectDialog = injector.getInstance(CustomizeObjectDialog.class);
-        customizeObjectDialog.setStartTime(startTime);
-        customizeObjectDialog.setSelectedEntity(selectedObject);
-        customizeObjectDialog.setOnDoneListener(onDoneListener);
-        customizeObjectDialog.display();
-      }
-    });
-
-    add(searchLabel);
-    add(searchTextField, "wrap");
-
-    JScrollPane scrollPane = new JScrollPane(buildOrderTable);
-    scrollPane.setMinimumSize(new Dimension(600, 300));
-    add(scrollPane, "span, wrap");
-    JButton saveButton = new JButton();
-    saveButton.setAction(new AbstractAction("Save") {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        buildOrder.setBuildItems(buildOrderTable.getBuildItems());
-        buildOrderMapper.save(buildOrder);
-        displayBuildOrderList();
-      }
-    });
-    add(saveButton);
-    revalidate();
+    BuildOrderView buildOrderView = injector.getInstance(BuildOrderView.class);
+    buildOrderView.setRace(race);
+    buildOrderView.setOnSaveListener(this);
+    displayView(buildOrderView);
   }
 
-  private List<BaseEntity> entitiesForAutocompletion(Race race) {
-    List<Unit> units = unitMapper.findByRaceName(race.name);
-    List<Upgrade> upgrades = upgradeMapper.findByRaceName(race.name);
-    List<Building> buildings = buildingMapper.findByRaceName(race.name);
-    List<BaseEntity> entities = Lists.newArrayList();
-    entities.addAll(units);
-    entities.addAll(upgrades);
-    entities.addAll(buildings);
-    return entities;
+  @Override
+  public void onSave(List<BuildItem> buildItems) {
+    buildOrder.setBuildItems(buildItems);
+    buildOrderMapper.save(buildOrder);
+    displayBuildOrderList();
   }
 }

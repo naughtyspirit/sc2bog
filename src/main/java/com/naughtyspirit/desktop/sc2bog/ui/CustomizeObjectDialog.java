@@ -57,7 +57,7 @@ public class CustomizeObjectDialog extends JDialog {
   private JSpinner createTimeSpinner() {
     JSpinner spinner = new JSpinner();
     spinner.setMinimumSize(new Dimension(40, 5));
-    SpinnerNumberModel model = new SpinnerNumberModel(startTime, startTime, 999, 1);
+    SpinnerNumberModel model = new SpinnerNumberModel(startTime, 1, 999, 1);
     spinner.setModel(model);
     spinner.setEditor(new JSpinner.NumberEditor(spinner, "#"));
     return spinner;
