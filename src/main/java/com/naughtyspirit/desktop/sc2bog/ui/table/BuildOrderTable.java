@@ -23,13 +23,16 @@ package com.naughtyspirit.desktop.sc2bog.ui.table;
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import com.google.common.collect.Lists;
 import com.naughtyspirit.desktop.sc2bog.model.GameObject;
+import com.naughtyspirit.desktop.sc2bog.model.db.entity.BuildItem;
 import com.naughtyspirit.desktop.sc2bog.ui.table.model.BuildOrderModel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.Highlighter;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 
 import javax.swing.*;
+import java.util.List;
 
 /**
  * Author: Venelin Valkov <venelin@naughtyspirit.com>
@@ -38,6 +41,7 @@ import javax.swing.*;
 public class BuildOrderTable extends JXTable {
 
   private BuildOrderModel buildOrderModel = new BuildOrderModel();
+  private List<BuildItem> buildItems = Lists.newArrayList();
 
   public BuildOrderTable() {
     setFillsViewportHeight(true);
@@ -50,6 +54,22 @@ public class BuildOrderTable extends JXTable {
   }
 
   public void addRow(GameObject row) {
+    BuildItem buildItem = new BuildItem();
+    buildItem.gameObjectId = row.getId();
+    buildItem.gameObjectType = row.getType().toString();
+    buildItem.quantity = row.getQuantity();
+    buildItem.time = row.getTime();
+    buildItems.add(buildItem);
     buildOrderModel.addRow(row);
+  }
+
+  public List<BuildItem> getBuildItems() {
+    return buildItems;
+  }
+
+  public void removeSelectedRow() {
+    buildItems.remove(getSelectedRow());
+    buildOrderModel.removeRow(getSelectedRow());
+    revalidate();
   }
 }

@@ -39,19 +39,19 @@ import java.util.List;
  */
 public abstract class BaseMapper<Entity_Type extends BaseEntity> {
 
-  private Connection connection;
+  protected Connection connection;
 
   @Inject
   public void setConnection(Connection connection) {
     this.connection = connection;
   }
 
-  protected List<Entity_Type> selectAll(String sql, int requestMethod, List<Entity_Type> resultList) {
+  protected List<Entity_Type> selectAll(String sql, List<Entity_Type> resultList) {
     try {
       Statement statement = connection.createStatement();
       ResultSet resultSet = statement.executeQuery(sql);
       while (resultSet.next()) {
-        onEachResult(resultSet, resultList, requestMethod);
+        onEachResult(resultSet, resultList);
       }
     } catch (SQLException e) {
       throw new MappingException("selection query execution failed", e);
@@ -59,12 +59,12 @@ public abstract class BaseMapper<Entity_Type extends BaseEntity> {
     return resultList;
   }
 
-  protected Entity_Type selectOne(String sql, int requestMethod, Entity_Type entityInstance) {
+  protected Entity_Type selectOne(String sql, Entity_Type entityInstance) {
     try {
       Statement statement = connection.createStatement();
       ResultSet resultSet = statement.executeQuery(sql);
       resultSet.next();
-      onResult(resultSet, entityInstance, requestMethod);
+      onResult(resultSet, entityInstance);
       if (resultSet.next()) {
         throw new MappingException("multiple entities returned from selecting one");
       }
@@ -74,7 +74,7 @@ public abstract class BaseMapper<Entity_Type extends BaseEntity> {
     return entityInstance;
   }
 
-  protected abstract void onEachResult(ResultSet resultSet, List<Entity_Type> resultList, int requestMethod) throws SQLException;
+  protected abstract void onEachResult(ResultSet resultSet, List<Entity_Type> resultList) throws SQLException;
 
-  protected abstract void onResult(ResultSet resultSet, Entity_Type entityInstance, int requestMethod) throws SQLException;
+  protected abstract void onResult(ResultSet resultSet, Entity_Type entityInstance) throws SQLException;
 }

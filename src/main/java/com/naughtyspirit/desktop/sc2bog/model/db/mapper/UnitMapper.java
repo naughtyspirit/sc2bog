@@ -38,8 +38,6 @@ import java.util.List;
  */
 public class UnitMapper extends BaseMapper<Unit> {
 
-  private static final int FIND_BY_RACE = 1;
-
   private RaceMapper raceMapper;
 
   @Inject
@@ -48,21 +46,17 @@ public class UnitMapper extends BaseMapper<Unit> {
   }
 
   public List<Unit> findByRace(Race race) {
-    return selectAll("SELECT * FROM unit WHERE race_id = " + race.id, FIND_BY_RACE, Lists.<Unit>newArrayList());
+    return selectAll("SELECT * FROM unit WHERE race_id = " + race.id, Lists.<Unit>newArrayList());
   }
 
   @Override
-  protected void onResult(ResultSet resultSet, Unit unit, int requestMethod) throws SQLException {
+  protected void onResult(ResultSet resultSet, Unit unit) throws SQLException {
     //To change body of implemented methods use File | Settings | File Templates.
   }
 
   @Override
-  protected void onEachResult(ResultSet resultSet, List<Unit> resultList, int requestMethod) throws SQLException {
-    switch (requestMethod) {
-      case FIND_BY_RACE:
-        resultList.add(Unit.of(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getInt("minerals"), resultSet.getInt("gas"), resultSet.getInt("supply"), resultSet.getInt("build_time")));
-        break;
-    }
+  protected void onEachResult(ResultSet resultSet, List<Unit> resultList) throws SQLException {
+    resultList.add(Unit.of(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getInt("minerals"), resultSet.getInt("gas"), resultSet.getInt("supply"), resultSet.getInt("build_time")));
   }
 
   public List<Unit> findByRaceName(String name) {

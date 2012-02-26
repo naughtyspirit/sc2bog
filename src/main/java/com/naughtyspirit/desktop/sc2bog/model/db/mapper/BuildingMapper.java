@@ -38,8 +38,6 @@ import java.util.List;
  */
 public class BuildingMapper extends BaseMapper<Building> {
 
-  private static final int FIND_BY_RACE = 1;
-
   private RaceMapper raceMapper;
 
   @Inject
@@ -48,21 +46,17 @@ public class BuildingMapper extends BaseMapper<Building> {
   }
 
   public List<Building> findByRace(Race race) {
-    return selectAll("SELECT * FROM building WHERE race_id = " + race.id, FIND_BY_RACE, Lists.<Building>newArrayList());
+    return selectAll("SELECT * FROM building WHERE race_id = " + race.id, Lists.<Building>newArrayList());
   }
 
   @Override
-  protected void onResult(ResultSet resultSet, Building building, int requestMethod) throws SQLException {
+  protected void onResult(ResultSet resultSet, Building building) throws SQLException {
     //To change body of implemented methods use File | Settings | File Templates.
   }
 
   @Override
-  protected void onEachResult(ResultSet resultSet, List<Building> resultList, int requestMethod) throws SQLException {
-    switch (requestMethod) {
-      case FIND_BY_RACE:
-        resultList.add(Building.of(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getInt("minerals"), resultSet.getInt("gas"), resultSet.getInt("build_time")));
-        break;
-    }
+  protected void onEachResult(ResultSet resultSet, List<Building> resultList) throws SQLException {
+    resultList.add(Building.of(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getInt("minerals"), resultSet.getInt("gas"), resultSet.getInt("build_time")));
   }
 
   public List<Building> findByRaceName(String name) {

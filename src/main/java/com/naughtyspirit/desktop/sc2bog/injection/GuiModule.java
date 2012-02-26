@@ -39,7 +39,7 @@ public class GuiModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(JPanel.class).annotatedWith(MainPanel.class).to(AppPanel.class);
     bind(JFrame.class).annotatedWith(MainFrame.class).to(AppFrame.class);
+    bind(JPanel.class).annotatedWith(MainPanel.class).to(AppPanel.class);
   }
 }

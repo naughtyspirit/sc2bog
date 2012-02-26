@@ -27,7 +27,6 @@ import com.naughtyspirit.desktop.sc2bog.injection.annotation.MainFrame;
 import com.naughtyspirit.desktop.sc2bog.injection.annotation.MainPanel;
 import com.naughtyspirit.desktop.sc2bog.model.GameObject;
 import com.naughtyspirit.desktop.sc2bog.model.db.entity.BaseEntity;
-import com.naughtyspirit.desktop.sc2bog.ui.listener.OnDoneListener;
 
 import javax.inject.Inject;
 import javax.swing.*;
@@ -83,6 +82,9 @@ public class CustomizeObjectDialog extends JDialog {
     add(doneButton);
     setVisible(true);
   }
+  public interface OnDoneListener {
+    void onDone(GameObject gameObject);
+  }
 
   private JSpinner createQuantitySpinner() {
     JSpinner spinner = new JSpinner();
@@ -97,7 +99,7 @@ public class CustomizeObjectDialog extends JDialog {
     doneButton.setAction(new AbstractAction("Done") {
       @Override
       public void actionPerformed(ActionEvent e) {
-        GameObject gameObject = new GameObject(selectedEntity.name, selectedEntity.getType(), (Integer) quantitySpinner.getValue(), (Integer) timeSpinner.getValue());
+        GameObject gameObject = new GameObject(selectedEntity.id, selectedEntity.name, selectedEntity.getType(), (Integer) quantitySpinner.getValue(), (Integer) timeSpinner.getValue());
         onDoneListener.onDone(gameObject);
         setVisible(false);
       }

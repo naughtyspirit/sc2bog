@@ -27,15 +27,14 @@ import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import com.naughtyspirit.desktop.sc2bog.injection.annotation.MainPanel;
 import com.naughtyspirit.desktop.sc2bog.model.GameObject;
-import com.naughtyspirit.desktop.sc2bog.model.db.entity.BaseEntity;
-import com.naughtyspirit.desktop.sc2bog.model.db.entity.Building;
-import com.naughtyspirit.desktop.sc2bog.model.db.entity.Unit;
-import com.naughtyspirit.desktop.sc2bog.model.db.entity.Upgrade;
+import com.naughtyspirit.desktop.sc2bog.model.db.entity.*;
+import com.naughtyspirit.desktop.sc2bog.model.db.mapper.BuildOrderMapper;
 import com.naughtyspirit.desktop.sc2bog.model.db.mapper.BuildingMapper;
 import com.naughtyspirit.desktop.sc2bog.model.db.mapper.UnitMapper;
 import com.naughtyspirit.desktop.sc2bog.model.db.mapper.UpgradeMapper;
+import com.naughtyspirit.desktop.sc2bog.ui.AppMenu;
 import com.naughtyspirit.desktop.sc2bog.ui.CustomizeObjectDialog;
-import com.naughtyspirit.desktop.sc2bog.ui.listener.OnDoneListener;
+import com.naughtyspirit.desktop.sc2bog.ui.NewBuildDialog;
 import com.naughtyspirit.desktop.sc2bog.ui.table.BuildOrderTable;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
@@ -43,8 +42,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.util.List;
 
 /**
@@ -52,12 +50,9 @@ import java.util.List;
  * Date: 22-02-2012
  */
 @Singleton
-public class AppFrame extends JFrame {
+public class AppFrame extends JFrame implements NewBuildDialog.OnDoneListener, AppMenu.OnNewListener, AppMenu.OnExitListener {
 
-  private final JPanel mainPanel;
-
-  private String buildRace;
-  private OnDoneListener onDoneListener = new OnDoneListener() {
+  private CustomizeObjectDialog.OnDoneListener onDoneListener = new CustomizeObjectDialog.OnDoneListener() {
     @Override
     public void onDone(GameObject gameObject) {
       buildOrderTable.addRow(gameObject);
@@ -70,6 +65,7 @@ public class AppFrame extends JFrame {
 
   private UnitMapper unitMapper;
   private int startTime = 1;
+  private BuildOrder buildOrder;
 
   @Inject
   public void setUnitMapper(UnitMapper unitMapper) {
@@ -93,30 +89,65 @@ public class AppFrame extends JFrame {
   private BuildOrderTable buildOrderTable;
 
   @Inject
-  public void setBuildOrderTable(BuildOrderTable buildOrderTable) {
-    this.buildOrderTable = buildOrderTable;
+  public void setBuildOrderMapper(BuildOrderMapper buildOrderMapper) {
+    this.buildOrderMapper = buildOrderMapper;
   }
 
+  private BuildOrderMapper buildOrderMapper;
+
   @Inject
-  public AppFrame(@MainPanel JPanel mainPanel) {
+  public AppFrame(@MainPanel JPanel mainPanel, AppMenu menuBar) {
     super("SC2 Build Order Generator");
-    this.mainPanel = mainPanel;
     centerOnScreen();
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     setContentPane(mainPanel);
-    setJMenuBar(appMenu());
+    setJMenuBar(menuBar);
+    menuBar.setOnNewListener(this);
+    menuBar.setOnExitListener(this);
   }
 
-  private JMenuBar appMenu() {
-    JMenuBar menuBar = new JMenuBar();
-    JMenu menu = new JMenu("File");
-    JMenuItem newItem = new JMenuItem();
-    newItem.setAction(new NewBuildAction("New"));
-    menu.add(newItem);
-    JMenuItem exitItem = new JMenuItem("Exit");
-    menu.add(exitItem);
-    menuBar.add(menu);
-    return menuBar;
+  public void display() {
+    displayBuildOrderList();
+    setVisible(true);
+  }
+
+  private void displayBuildOrderList() {
+    getContentPane().removeAll();
+    repaint();
+    JLabel buildOrderListLabel = new JLabel("Saved Build Orders");
+    add(buildOrderListLabel, "wrap");
+    final DefaultListModel<BuildOrder> buildOrderListModel = new DefaultListModel<BuildOrder>();
+    List<BuildOrder> buildOrders = buildOrderMapper.findAll();
+    for (BuildOrder buildOrder : buildOrders) {
+      buildOrderListModel.addElement(buildOrder);
+    }
+    final JList<BuildOrder> list = new JList<BuildOrder>(buildOrderListModel);
+    list.addKeyListener(new KeyListener() {
+      @Override
+      public void keyTyped(KeyEvent e) {
+      }
+
+      @Override
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+          BuildOrder buildOrder = list.getSelectedValue();
+          buildOrderMapper.delete(buildOrder);
+          buildOrderListModel.remove(list.getSelectedIndex());
+          list.revalidate();
+        }
+      }
+
+      @Override
+      public void keyReleased(KeyEvent e) {
+      }
+    });
+    list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+    list.setLayoutOrientation(JList.VERTICAL);
+    list.setVisibleRowCount(-1);
+    JScrollPane listScroll = new JScrollPane(list);
+    listScroll.setMinimumSize(new Dimension(200, 250));
+    add(listScroll);
+    revalidate();
   }
 
   private void centerOnScreen() {
@@ -128,29 +159,40 @@ public class AppFrame extends JFrame {
     setLocation(screenWidth / 4, screenHeight / 4);
   }
 
-  class NewBuildAction extends AbstractAction {
-
-    public NewBuildAction(String name) {
-      super(name);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      String[] possibleValues = {"Terran", "Protoss", "Zerg"};
-      int optionSelected = JOptionPane.showOptionDialog(AppFrame.this,
-              "Choose race", "Race",
-              JOptionPane.YES_NO_CANCEL_OPTION,
-              JOptionPane.QUESTION_MESSAGE, null,
-              possibleValues, possibleValues[0]);
-      if (optionSelected != JOptionPane.CLOSED_OPTION) {
-        buildRace = possibleValues[optionSelected];
-        addBuildOrderView();
-      }
-    }
+  @Override
+  public void onDone(String name, Race race) {
+    buildOrder = new BuildOrder();
+    buildOrder.name = name;
+    buildOrder.raceId = race.id;
+    displayBuildOrderView(race);
   }
 
-  public void addBuildOrderView() {
-    List<BaseEntity> entities = entitiesForAutocompletion();
+  @Override
+  public void onNew() {
+    NewBuildDialog newBuildDialog = injector.getInstance(NewBuildDialog.class);
+    newBuildDialog.setOnDoneListener(this);
+    newBuildDialog.display();
+  }
+
+  @Override
+  public void onExit() {
+    System.exit(0);
+  }
+
+  public void displayBuildOrderView(Race race) {
+    getContentPane().removeAll();
+    repaint();
+
+    buildOrderTable = new BuildOrderTable();
+    buildOrderTable.addKeyListener(new KeyAdapter() {
+      @Override
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+          buildOrderTable.removeSelectedRow();
+        }
+      }
+    });
+    List<BaseEntity> entities = entitiesForAutocompletion(race);
     JLabel searchLabel = new JLabel("Search");
     final JComboBox<BaseEntity> searchTextField = new JComboBox<BaseEntity>(entities.toArray(new BaseEntity[entities.size()]));
     AutoCompleteDecorator.decorate(searchTextField);
@@ -167,19 +209,29 @@ public class AppFrame extends JFrame {
       }
     });
 
-    mainPanel.add(searchLabel);
-    mainPanel.add(searchTextField, "wrap");
+    add(searchLabel);
+    add(searchTextField, "wrap");
 
     JScrollPane scrollPane = new JScrollPane(buildOrderTable);
     scrollPane.setMinimumSize(new Dimension(600, 300));
-    mainPanel.add(scrollPane, "span");
-    validate();
+    add(scrollPane, "span, wrap");
+    JButton saveButton = new JButton();
+    saveButton.setAction(new AbstractAction("Save") {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        buildOrder.setBuildItems(buildOrderTable.getBuildItems());
+        buildOrderMapper.save(buildOrder);
+        displayBuildOrderList();
+      }
+    });
+    add(saveButton);
+    revalidate();
   }
 
-  private List<BaseEntity> entitiesForAutocompletion() {
-    List<Unit> units = unitMapper.findByRaceName(buildRace);
-    List<Upgrade> upgrades = upgradeMapper.findByRaceName(buildRace);
-    List<Building> buildings = buildingMapper.findByRaceName(buildRace);
+  private List<BaseEntity> entitiesForAutocompletion(Race race) {
+    List<Unit> units = unitMapper.findByRaceName(race.name);
+    List<Upgrade> upgrades = upgradeMapper.findByRaceName(race.name);
+    List<Building> buildings = buildingMapper.findByRaceName(race.name);
     List<BaseEntity> entities = Lists.newArrayList();
     entities.addAll(units);
     entities.addAll(upgrades);

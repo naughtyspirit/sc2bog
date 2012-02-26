@@ -38,8 +38,6 @@ import java.util.List;
  */
 public class UpgradeMapper extends BaseMapper<Upgrade> {
 
-  private static final int FIND_BY_RACE = 1;
-
   private RaceMapper raceMapper;
 
   @Inject
@@ -48,7 +46,7 @@ public class UpgradeMapper extends BaseMapper<Upgrade> {
   }
 
   public List<Upgrade> findByRace(Race race) {
-    return selectAll("SELECT * FROM upgrade WHERE race_id = " + race.id, FIND_BY_RACE, Lists.<Upgrade>newArrayList());
+    return selectAll("SELECT * FROM upgrade WHERE race_id = " + race.id, Lists.<Upgrade>newArrayList());
   }
 
   public List<Upgrade> findByRaceName(String name) {
@@ -58,16 +56,12 @@ public class UpgradeMapper extends BaseMapper<Upgrade> {
 
 
   @Override
-  protected void onEachResult(ResultSet resultSet, List<Upgrade> resultList, int requestMethod) throws SQLException {
-    switch (requestMethod) {
-      case FIND_BY_RACE:
-        resultList.add(Upgrade.of(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getInt("minerals"), resultSet.getInt("gas"), resultSet.getInt("build_time")));
-        break;
-    }
+  protected void onEachResult(ResultSet resultSet, List<Upgrade> resultList) throws SQLException {
+    resultList.add(Upgrade.of(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getInt("minerals"), resultSet.getInt("gas"), resultSet.getInt("build_time")));
   }
 
   @Override
-  protected void onResult(ResultSet resultSet, Upgrade entityInstance, int requestMethod) throws SQLException {
+  protected void onResult(ResultSet resultSet, Upgrade entityInstance) throws SQLException {
     //To change body of implemented methods use File | Settings | File Templates.
   }
 }

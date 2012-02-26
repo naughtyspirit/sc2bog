@@ -1,4 +1,4 @@
-package com.naughtyspirit.desktop.sc2bog.model.db.entity;
+package com.naughtyspirit.desktop.sc2bog.ui;
 
 /**
  * Copyright (c) 2012 Naughty Spirit
@@ -23,20 +23,56 @@ package com.naughtyspirit.desktop.sc2bog.model.db.entity;
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.naughtyspirit.desktop.sc2bog.model.GameObject;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * Author: Venelin Valkov <venelin@naughtyspirit.com>
- * Date: 22-02-2012
+ * Date: 26-02-2012
  */
-public class Race extends BaseEntity {
+public class AppMenu extends JMenuBar {
 
-  public static Race of(int id, String name) {
-    return BaseEntity.of(new Race(), id, name);
+  private OnNewListener onNewListener;
+  private OnExitListener onExitListener;
+
+  public void setOnExitListener(OnExitListener onExitListener) {
+    this.onExitListener = onExitListener;
   }
 
-  @Override
-  public GameObject.Type getType() {
-    return GameObject.Type.RACE;
+  public void setOnNewListener(OnNewListener onNewListener) {
+    this.onNewListener = onNewListener;
   }
+
+  public interface OnNewListener {
+
+    void onNew();
+  }
+
+  public interface OnExitListener {
+
+    void onExit();
+  }
+
+  public AppMenu() {
+    JMenu menu = new JMenu("File");
+    JMenuItem newItem = new JMenuItem("New");
+    newItem.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        onNewListener.onNew();
+      }
+    });
+    menu.add(newItem);
+    JMenuItem exitItem = new JMenuItem("Exit");
+    exitItem.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        onExitListener.onExit();
+      }
+    });
+    menu.add(exitItem);
+    add(menu);
+  }
+
 }

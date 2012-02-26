@@ -36,30 +36,22 @@ import java.util.List;
  */
 public class RaceMapper extends BaseMapper<Race> {
 
-  public static final int FIND_ALL = 1;
-  public static final int FIND_BY_NAME = 2;
-
   public List<Race> findAll() {
-    return selectAll("SELECT * FROM race", FIND_ALL, Lists.<Race>newArrayList());
+    return selectAll("SELECT * FROM race ORDER BY id", Lists.<Race>newArrayList());
   }
 
   public Race findByName(String name) {
-    return selectOne("SELECT * FROM race WHERE name = '" + name + "'", FIND_BY_NAME, new Race());
+    return selectOne("SELECT * FROM race WHERE name = '" + name + "'", new Race());
   }
 
   @Override
-  protected void onEachResult(ResultSet resultSet, List resultList, int requestMethod) throws SQLException {
-    //To change body of implemented methods use File | Settings | File Templates.
+  protected void onEachResult(ResultSet resultSet, List<Race> resultList) throws SQLException {
+    resultList.add(Race.of(resultSet.getInt("id"), resultSet.getString("name")));
   }
 
   @Override
-  protected void onResult(ResultSet resultSet, Race race, int requestMethod) throws SQLException {
-    switch (requestMethod) {
-      case FIND_BY_NAME:
-        race.id = resultSet.getInt("id");
-        race.name = resultSet.getString("name");
-        break;
-    }
-    //To change body of implemented methods use File | Settings | File Templates.
+  protected void onResult(ResultSet resultSet, Race race) throws SQLException {
+    race.id = resultSet.getInt("id");
+    race.name = resultSet.getString("name");
   }
 }

@@ -38,8 +38,6 @@ import java.util.List;
  */
 public class AbilityMapper extends BaseMapper<Ability> {
 
-  private static final int FIND_BY_RACE = 1;
-
   private RaceMapper raceMapper;
 
   @Inject
@@ -48,7 +46,7 @@ public class AbilityMapper extends BaseMapper<Ability> {
   }
 
   public List<Ability> findByRace(Race race) {
-    return selectAll("SELECT * FROM ability WHERE race_id = " + race.id, FIND_BY_RACE, Lists.<Ability>newArrayList());
+    return selectAll("SELECT * FROM ability WHERE race_id = " + race.id, Lists.<Ability>newArrayList());
   }
 
   public List<Ability> findByRaceName(String name) {
@@ -57,16 +55,12 @@ public class AbilityMapper extends BaseMapper<Ability> {
   }
 
   @Override
-  protected void onEachResult(ResultSet resultSet, List<Ability> resultList, int requestMethod) throws SQLException {
-    switch (requestMethod) {
-      case FIND_BY_RACE:
-        resultList.add(Ability.of(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getInt("build_time")));
-        break;
-    }
+  protected void onEachResult(ResultSet resultSet, List<Ability> resultList) throws SQLException {
+    resultList.add(Ability.of(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getInt("build_time")));
   }
 
   @Override
-  protected void onResult(ResultSet resultSet, Ability entityInstance, int requestMethod) throws SQLException {
+  protected void onResult(ResultSet resultSet, Ability entityInstance) throws SQLException {
     //To change body of implemented methods use File | Settings | File Templates.
   }
 }

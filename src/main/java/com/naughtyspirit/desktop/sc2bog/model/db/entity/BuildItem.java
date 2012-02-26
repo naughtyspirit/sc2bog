@@ -27,16 +27,29 @@ import com.naughtyspirit.desktop.sc2bog.model.GameObject;
 
 /**
  * Author: Venelin Valkov <venelin@naughtyspirit.com>
- * Date: 22-02-2012
+ * Date: 25-02-2012
  */
-public class Race extends BaseEntity {
+public class BuildItem extends BaseEntity {
 
-  public static Race of(int id, String name) {
-    return BaseEntity.of(new Race(), id, name);
-  }
+  public int buildOrderId;
+  public int gameObjectId;
+  public String gameObjectType;
+  public int quantity;
+  public int time;
 
   @Override
   public GameObject.Type getType() {
-    return GameObject.Type.RACE;
+    return GameObject.Type.BUILD_ITEM;
+  }
+
+  public static BuildItem of(int id, int buildOrderId, int gameObjectId, String gameObjectType, int quantity, int time) {
+    BuildItem buildItem = new BuildItem();
+    buildItem.id = id;
+    buildItem.buildOrderId = buildOrderId;
+    buildItem.gameObjectId = gameObjectId;
+    buildItem.gameObjectType = gameObjectType;
+    buildItem.quantity = quantity;
+    buildItem.time = time;
+    return buildItem;
   }
 }

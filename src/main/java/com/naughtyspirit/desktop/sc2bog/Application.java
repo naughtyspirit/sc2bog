@@ -39,7 +39,7 @@ public class Application {
   private void createAndShowGUI() {
     Injector injector = Guice.createInjector(new DbModule(), new GuiModule());
     AppFrame appFrame = injector.getInstance(AppFrame.class);
-    appFrame.setVisible(true);
+    appFrame.display();
   }
 
   public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package com.naughtyspirit.desktop.sc2bog.ui.listener;
+package com.naughtyspirit.desktop.sc2bog.model.db.entity;
 
 /**
  * Copyright (c) 2012 Naughty Spirit
@@ -25,11 +25,27 @@ package com.naughtyspirit.desktop.sc2bog.ui.listener;
 
 import com.naughtyspirit.desktop.sc2bog.model.GameObject;
 
+import java.util.List;
+
 /**
  * Author: Venelin Valkov <venelin@naughtyspirit.com>
- * Date: 22-02-2012
+ * Date: 25-02-2012
  */
-public interface OnDoneListener {
+public class BuildOrder extends BaseEntity {
 
-  void onDone(GameObject gameObject);
+  public List<BuildItem> buildItems;
+  public int raceId;
+
+  @Override
+  public GameObject.Type getType() {
+    return GameObject.Type.BUILD_ORDER;
+  }
+
+  public static BuildOrder of(int id, String name) {
+    return BaseEntity.of(new BuildOrder(), id, name);
+  }
+
+  public void setBuildItems(List<BuildItem> buildItems) {
+    this.buildItems = buildItems;
+  }
 }

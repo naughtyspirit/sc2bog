@@ -29,31 +29,26 @@ package com.naughtyspirit.desktop.sc2bog.model;
  */
 public class GameObject {
 
+  private final int id;
   private final String name;
   private final Type type;
-  private final int minerals;
-  private final int gas;
-  private final int supply;
   private final int quantity;
   private final int time;
 
-  public GameObject(String name, Type type, int quantity, int time) {
-    this(name, type, 0, 0, 0, quantity, time);
+  public GameObject(int id, String name, Type type, int quantity, int time) {
+    this.id = id;
+    this.name = name;
+    this.type = type;
+    this.quantity = quantity;
+    this.time = time;
+  }
+
+  public int getId() {
+    return id;
   }
 
   public enum Type {
-    RACE, UNIT, BUILDING, UPGRADE, ABILITY
-  }
-
-  public GameObject(String name, Type type, int minerals, int gas, int supply, int quantity, int time) {
-
-    this.name = name;
-    this.type = type;
-    this.minerals = minerals;
-    this.gas = gas;
-    this.supply = supply;
-    this.quantity = quantity;
-    this.time = time;
+    RACE, UNIT, BUILDING, UPGRADE, ABILITY, BUILD_ORDER, BUILD_ITEM
   }
 
   public String getName() {
@@ -62,18 +57,6 @@ public class GameObject {
 
   public Type getType() {
     return type;
-  }
-
-  public int getMinerals() {
-    return minerals;
-  }
-
-  public int getGas() {
-    return gas;
-  }
-
-  public int getSupply() {
-    return supply;
   }
 
   public int getQuantity() {
